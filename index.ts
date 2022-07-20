@@ -7,8 +7,9 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT;
 
-app.get('/', (req, res) => {
-    res.send(hedera.hedera());
+app.get('/test', async (req, res) => {
+    const result = await hedera.Transfer10HBARS();
+    res.send(result);
 });
 
 app.listen(port, () => {

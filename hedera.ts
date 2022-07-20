@@ -1,5 +1,5 @@
 import { Client, AccountBalanceQuery, TransferTransaction, Hbar } from "@hashgraph/sdk";
-import { error } from "console";
+
 
 import dotenv from 'dotenv';
 
@@ -8,27 +8,40 @@ dotenv.config();
 
 const myAccountId = process.env.MY_ACCOUNT_ID;
 const myPrivateKey = process.env.MY_PRIVATE_KEY;
+const otherAccountId = process.env.OTHER_ACCOUNT_ID;
 
-
-export async function hedera() {
+export async function Transfer10HBARS() {
     if (myAccountId == null ||
-        myPrivateKey == null) {
+        myPrivateKey == null || otherAccountId == null) {
         throw new Error("Environment variables myAccountId and myPrivateKey must be present");
     }
 
-    // Create our connection to the Hedera network
-    // The Hedera JS SDK makes this really easy!
-    const client = Client.forTestnet();
 
-    client.setOperator(myAccountId, myPrivateKey);
 
     try {
+        // Create our connection to the Hedera network
+        // The Hedera JS SDK makes this really easy!
+        const client = Client.forTestnet();
+
+        client.setOperator(myAccountId, myPrivateKey);
         const sendHbar = await new TransferTransaction()
             .addHbarTransfer(myAccountId, Hbar.fromTinybars(-10)) //Sending account
-            .addHbarTransfer('0.0.47499760', Hbar.fromTinybars(10)) //Receiving account
+            .addHbarTransfer(otherAccountId, Hbar.fromTinybars(10)) //Receiving account
             .execute(client);
 
-        return sendHbar;
+        //Verify the transaction reached consensus
+        const transactionReceipt = await sendHbar.getReceipt(client);
+        console.log("The transfer transaction from my account to the new account was: " + transactionReceipt.status.toString());
+        return 0;
+        /* send our first hbar transfer! */
+
+        // const transactionId = await new CryptoTransferTransaction()
+        //     .addSender(myAccountId, 1)
+        //     .addRecipient("0.0.47499760", 1)
+        //     .setTransactionMemo("Hello future!")
+        //     .execute(client);
+        // /* get the receipt of this transfer */
+
 
     }
     catch (e) {
@@ -46,5 +59,14 @@ export async function hedera() {
     // return queryCost;
 }
 
-//hedera();
+// export async function GetBalance() {
+//     if (myAccountId == null ||
+//         myPrivateKey == null) {
+//         throw new Error("Environment variables myAccountId and myPrivateKey must be present");
+//     }
+//     const client = Client.forTestnet();
+
+//     client.setOperator(myAccountId, myPrivateKey);
+//     console.log('current account balance:', await client.getAccountBalance());
+// }
 
